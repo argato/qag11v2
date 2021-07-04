@@ -3,6 +3,7 @@ package test;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 import static com.codeborne.selenide.Selenide.open;
+import static io.qameta.allure.Allure.step;
 
 import com.codeborne.selenide.CollectionCondition;
 import com.codeborne.selenide.Condition;
@@ -36,17 +37,22 @@ public class CounterOfCartInHeaderTests extends TestBase {
   @Severity(SeverityLevel.NORMAL)
   void showingCounterTest() {
     String expectedItemName = "Льняное масло 250мл царевщино";
-    popUpHelper.popupCityClose();
-    $(".header-sub .search [name='q']").setValue("Льняное масло 250мл царевщино");
-    $(".header-sub .search button.icon-search").click();
-    $$(".card-list__element").shouldHave(CollectionCondition.sizeGreaterThan(0));
+    step("Выполнить поиск", (step) -> {
+      popUpHelper.popupCityClose();
+      $(".header-sub .search [name='q']").setValue("Льняное масло 250мл царевщино");
+      $(".header-sub .search button.icon-search").click();
+      $$(".card-list__element").shouldHave(CollectionCondition.sizeGreaterThan(0));
+    });
+    step("Добавить в корзину один товар из результатов поиска", (step) -> {
+      SelenideElement resultItem = $$(".product-card")
+          .findBy(Condition.text(expectedItemName))
+          .shouldHave(Condition.exist);
 
-    SelenideElement resultItem = $$(".product-card")
-        .findBy(Condition.text(expectedItemName))
-        .shouldHave(Condition.exist);
-
-    resultItem.$(".service_btn_buy_main:not(.q1)").click();
-    $(".search span.icon__count_pump").shouldHave(Condition.text("1"));
+      resultItem.$(".service_btn_buy_main:not(.q1)").click();
+    });
+    step("Проверить, что счетчик корзины отображается и равен единице", (step) -> {
+      $(".search span.icon__count_pump").shouldHave(Condition.text("1"));
+    });
   }
 
   @Test
@@ -55,38 +61,50 @@ public class CounterOfCartInHeaderTests extends TestBase {
   void showingCounterTwoItemsTest() {
     String expectedItemName = "Льняное масло 250мл царевщино";
     popUpHelper.popupCityClose();
-    $(".header-sub .search [name='q']").setValue("Льняное масло 250мл царевщино");
-    $(".header-sub .search button.icon-search").click();
-    $$(".card-list__element").shouldHave(CollectionCondition.sizeGreaterThan(0));
+    step("Выполнить поиск", (step) -> {
+      $(".header-sub .search [name='q']").setValue("Льняное масло 250мл царевщино");
+      $(".header-sub .search button.icon-search").click();
+      $$(".card-list__element").shouldHave(CollectionCondition.sizeGreaterThan(0));
+    });
+    step("Добавить в корзину две единицы одного товара из результатов поиска", (step) -> {
+      SelenideElement resultItem = $$(".product-card")
+          .findBy(Condition.text(expectedItemName))
+          .shouldHave(Condition.exist);
 
-    SelenideElement resultItem = $$(".product-card")
-        .findBy(Condition.text(expectedItemName))
-        .shouldHave(Condition.exist);
-
-    resultItem.$(".service_btn_buy_main:not(.q1)").click();
-    $(".search span.icon__count_pump").shouldHave(Condition.text("1"));
-
-    resultItem.$("div.product-card__content > .product-card__action .btn-product_add").click();
-    $(".search span.icon__count_pump").shouldHave(Condition.text("1"));
+      resultItem.$(".service_btn_buy_main:not(.q1)").click();
+      $(".search span.icon__count_pump").shouldHave(Condition.text("1"));
+      resultItem.$("div.product-card__content > .product-card__action .btn-product_add").click();
+    });
+    step("Проверить, что счетчик корзины отображается и равен единице", (step) -> {
+      $(".search span.icon__count_pump").shouldHave(Condition.text("1"));
+    });
   }
 
   @Test
   @DisplayName("Отображение счетчика, при нажатии \"Купить в один клик\".")
   @Severity(SeverityLevel.NORMAL)
   void buyOneClickShowingCounterTest() {
-    String expectedItemName = "Льняное масло 250мл царевщино";
+
     popUpHelper.popupCityClose();
-    $(".header-sub .search [name='q']").setValue("Льняное масло 250мл царевщино");
-    $(".header-sub .search button.icon-search").click();
-    $$(".card-list__element").shouldHave(CollectionCondition.sizeGreaterThan(0));
+    String expectedItemName = "Льняное масло 250мл царевщино";
+    step("Выполнить поиск", (step) -> {
 
-    SelenideElement resultItem = $$(".product-card")
-        .findBy(Condition.text(expectedItemName))
-        .shouldHave(Condition.exist);
-
-    resultItem.scrollTo()
-              .$("div.product-card__content > .product-card__buynow a[data-entity='basket-checkout-button']")
-              .click();
-    $(".search span.icon__count_pump").shouldHave(Condition.text("1"));
+      $(".header-sub .search [name='q']").setValue("Льняное масло 250мл царевщино");
+      $(".header-sub .search button.icon-search").click();
+      $$(".card-list__element").shouldHave(CollectionCondition.sizeGreaterThan(0));
+    });
+    step("Нажать \"Купить в один клик\" на одном из результатов поиска", (step) -> {
+      SelenideElement resultItem = $$(".product-card")
+          .findBy(Condition.text(expectedItemName))
+          .shouldHave(Condition.exist);
+      resultItem.scrollTo()
+                .$("div.product-card__content > .product-card__buynow a[data-entity='basket-checkout-button']")
+                .click();
+    });
+    step(
+        "Проверить, что счетчик корзины отображается и равен единице при нажатии \"Купить в один клик\"",
+        (step) -> {
+          $(".search span.icon__count_pump").shouldHave(Condition.text("1"));
+        });
   }
 }

@@ -3,6 +3,7 @@ package test;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 import static com.codeborne.selenide.Selenide.open;
+import static io.qameta.allure.Allure.step;
 import static test.TestBase.BASE_URL;
 
 import com.codeborne.selenide.CollectionCondition;
@@ -38,18 +39,23 @@ public class GoToCart {
   void buyOneClickGoToCartTest() {
     String expectedItemName = "Льняное масло 250мл царевщино";
     popUpHelper.popupCityClose();
-    $(".header-sub .search [name='q']").setValue("Льняное масло 250мл царевщино");
-    $(".header-sub .search button.icon-search").click();
-    $$(".card-list__element").shouldHave(CollectionCondition.sizeGreaterThan(0));
+    step("Выполнить поиск", (step) -> {
+      $(".header-sub .search [name='q']").setValue("Льняное масло 250мл царевщино");
+      $(".header-sub .search button.icon-search").click();
+      $$(".card-list__element").shouldHave(CollectionCondition.sizeGreaterThan(0));
+    });
+    step("Нажать на \"Купить в один клик\" на одном из результатов поиска", (step) -> {
+      SelenideElement resultItem = $$(".product-card")
+          .findBy(Condition.text(expectedItemName))
+          .shouldHave(Condition.exist);
 
-    SelenideElement resultItem = $$(".product-card")
-        .findBy(Condition.text(expectedItemName))
-        .shouldHave(Condition.exist);
-
-    resultItem.scrollTo()
-              .$("div.product-card__content > .product-card__buynow a[data-entity='basket-checkout-button']")
-              .click();
-    $(".page-content__basket-inn h1").shouldHave(
-        Condition.text("Выберите аптеку, в которой хотите забрать заказ"));
+      resultItem.scrollTo()
+                .$("div.product-card__content > .product-card__buynow a[data-entity='basket-checkout-button']")
+                .click();
+    });
+    step("Проверить, что произошел переход в корзину к шагу выбора аптеки", (step) -> {
+      $(".page-content__basket-inn h1").shouldHave(
+          Condition.text("Выберите аптеку, в которой хотите забрать заказ"));
+    });
   }
 }

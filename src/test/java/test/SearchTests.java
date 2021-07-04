@@ -3,6 +3,7 @@ package test;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 import static com.codeborne.selenide.Selenide.open;
+import static io.qameta.allure.Allure.step;
 
 import com.codeborne.selenide.CollectionCondition;
 import helper.PopUpHelper;
@@ -34,8 +35,13 @@ public class SearchTests extends TestBase {
   @Severity(SeverityLevel.CRITICAL)
   void validStringSearchTest() {
     popUpHelper.popupCityClose();
-    $(".header-sub .search [name='q']").setValue("матрас");
-    $(".header-sub .search button.icon-search").click();
-    $$(".card-list__element").shouldHave(CollectionCondition.sizeGreaterThan(0));
+    step("Поиск по строке {searchedValue}", (step) -> {
+      String searchedValue = "матрас";
+      $(".header-sub .search [name='q']").setValue(searchedValue);
+      $(".header-sub .search button.icon-search").click();
+    });
+    step("Проверка наличия результатов поиска", (step) -> {
+      $$(".card-list__element").shouldHave(CollectionCondition.sizeGreaterThan(0));
+    });
   }
 }
